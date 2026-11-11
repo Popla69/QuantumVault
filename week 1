@@ -1,0 +1,208 @@
+# QUANTUMVAULT
+## WEEK 1 – CRYPTOGRAPHIC FOUNDATION & POST-QUANTUM KEY ENCAPSULATION
+
+**Team Role:** Member 1 – Cryptography & Post-Quantum Cryptography Engineer  
+**Project:** QuantumVault – Post-Quantum Secure File Storage System  
+**Duration:** Week 1  
+**Primary Standard:** NIST FIPS 203 – ML-KEM
+
+---
+
+## 1. Week 1 Objective
+
+The primary objective of Week 1 is to establish the cryptographic foundation of QuantumVault by researching, implementing and validating the Post-Quantum Key Encapsulation Mechanism (ML-KEM).
+
+The focus will be on implementing ML-KEM according to the NIST FIPS 203 standard, enabling two communicating parties to establish a common cryptographic secret without directly transmitting that secret.
+
+This shared secret will serve as the foundation for the hybrid encryption mechanism that will be developed in Week 2 using AES-256-GCM.
+
+## 2. Research and Technical Understanding
+
+The initial phase will focus on understanding the cryptographic concepts and standards required for implementation.
+
+The following areas will be studied:
+
+- Fundamentals of Post-Quantum Cryptography (PQC).
+- Security limitations of conventional public-key cryptographic systems against potential quantum-computing attacks.
+- Introduction to lattice-based cryptography.
+- Module Learning With Errors (Module-LWE).
+- NIST FIPS 203 standard and ML-KEM architecture.
+- ML-KEM key generation, encapsulation and decapsulation.
+- Security parameter sets: ML-KEM-512, ML-KEM-768 and ML-KEM-1024.
+- Public-key and private-key management principles.
+
+**Selected algorithm:** ML-KEM-768.
+
+The implementation will use a maintained cryptographic library supporting the standardized ML-KEM functionality rather than developing the underlying mathematical primitives independently.
+
+## 3. Development Environment and Library Configuration
+
+A dedicated Python development environment will be configured for implementing the cryptographic module.
+
+Planned activities:
+
+- Configure the Python virtual environment.
+- Identify and install a suitable ML-KEM-compatible cryptographic library.
+- Verify compatibility with NIST FIPS 203.
+- Test the availability of key generation, encapsulation and decapsulation operations.
+- Organize the source-code structure.
+- Configure dependency management and basic error handling.
+
+The selected library and its version will be documented to ensure reproducibility.
+
+## 4. ML-KEM Key Generation Implementation
+
+The key-generation component will be developed to generate the cryptographic key pair required for secure key establishment.
+
+The implementation will include:
+
+- Generation of an ML-KEM-768 encapsulation key.
+- Generation of the corresponding decapsulation key.
+- Separation of public and private key material.
+- Validation of generated key representations.
+- Appropriate handling of private-key material.
+- Key serialization and deserialization support where required.
+
+The encapsulation key will be used by the sender, while the corresponding decapsulation key will remain with the recipient.
+
+## 5. ML-KEM Encapsulation Implementation
+
+The encapsulation component will establish a shared secret using the recipient's public encapsulation key.
+
+Planned functionality:
+
+- Accept the recipient's encapsulation key.
+- Execute the ML-KEM encapsulation operation.
+- Generate a cryptographic shared secret.
+- Generate the corresponding KEM ciphertext.
+- Return the outputs in a structured format.
+
+The generated shared secret will not be transmitted directly. Only the encapsulation ciphertext will need to be communicated to the recipient.
+
+## 6. ML-KEM Decapsulation Implementation
+
+The decapsulation component will allow the recipient to recover the shared secret using the corresponding private decapsulation key.
+
+Planned functionality:
+
+- Accept the recipient's decapsulation key.
+- Receive the KEM ciphertext generated during encapsulation.
+- Execute the ML-KEM decapsulation operation.
+- Recover the shared secret.
+- Handle invalid inputs and cryptographic failures.
+- Verify successful shared-secret agreement.
+
+The encapsulation and decapsulation components will be connected to establish a complete key-encapsulation workflow.
+
+## 7. Cryptographic Module Development
+
+The implemented functionality will be organized into a reusable Python module.
+
+Proposed structure:
+
+```text
+quantumvault/
+│
+├── crypto_engine/
+│   ├── __init__.py
+│   └── pqc.py
+│
+├── tests/
+│   └── test_pqc.py
+│
+├── requirements.txt
+└── README.md
+```
+
+The module will expose the following primary operations:
+
+- `generate_keypair()`
+- `encapsulate(public_key)`
+- `decapsulate(private_key, ciphertext)`
+
+The implementation will maintain clear separation between the underlying cryptographic operations and the application-level components.
+
+## 8. Testing and Validation
+
+Testing will focus on verifying the correctness and reliability of the ML-KEM implementation.
+
+The following test cases will be considered:
+
+| Test | Validation objective |
+|---|---|
+| Key generation | Verify successful key-pair generation |
+| Encapsulation | Verify shared-secret and ciphertext generation |
+| Decapsulation | Verify successful secret recovery |
+| Secret comparison | Confirm both parties obtain identical secrets |
+| Repeated operations | Verify independent operations |
+| Invalid key inputs | Verify safe error handling |
+| Malformed ciphertext | Verify appropriate invalid-input handling |
+| Key-size validation | Compare outputs with FIPS 203 specifications |
+| Official test vectors | Validate against applicable NIST test vectors |
+
+**Core verification condition:**
+
+```text
+Encapsulation:
+(K1, C) = Encaps(ek)
+
+Decapsulation:
+K2 = Decaps(dk, C)
+
+Verification:
+K1 == K2
+```
+
+Additional validation will ensure that the implementation follows the selected library's documented behavior and the relevant requirements of FIPS 203.
+
+## 9. Expected Week 1 Deliverables
+
+By the end of Week 1, the following deliverables are expected:
+
+1. **Technical Research Documentation:** Understanding of ML-KEM, FIPS 203 and post-quantum cryptography fundamentals.
+2. **Configured Development Environment:** Python environment with the selected cryptographic dependency.
+3. **Key Generation Module:** Implementation of ML-KEM-768 key-pair generation.
+4. **Encapsulation Module:** Implementation of shared-secret and KEM ciphertext generation.
+5. **Decapsulation Module:** Implementation of shared-secret recovery.
+6. **Cryptographic Test Suite:** Automated tests for key generation, encapsulation and decapsulation.
+7. **Validation Documentation:** Test results, key-size verification and identified implementation issues.
+8. **Source Code:** Organized and reusable ML-KEM implementation.
+
+## 10. Integration Preparation
+
+The ML-KEM module will be designed to support integration with the other QuantumVault components.
+
+The following outputs and interfaces will be made available:
+
+- Encapsulation key.
+- Decapsulation key.
+- Shared secret.
+- KEM ciphertext.
+- Standardized function interfaces.
+- Structured error handling.
+
+These interfaces will provide the foundation for Week 2, during which HKDF-SHA-256 and AES-256-GCM will be implemented.
+
+Coordination with the filesystem and application developers will also be carried out to ensure compatibility with their respective modules.
+
+## 11. Week 1 Completion Criteria
+
+Week 1 will be considered complete when:
+
+- The ML-KEM-768 implementation is operational.
+- Key generation is functional.
+- Encapsulation successfully generates a shared secret and ciphertext.
+- Decapsulation successfully recovers the shared secret.
+- Both parties obtain matching shared secrets.
+- Functional and negative tests have been performed.
+- Applicable official test vectors have been checked.
+- The source code is organized and reusable.
+- Technical documentation and integration interfaces are prepared.
+
+## 12. Next Phase
+
+**Week 2 – Symmetric Encryption and Hybrid Cryptographic Implementation**
+
+The next phase will focus on implementing HKDF-SHA-256 and AES-256-GCM, deriving symmetric encryption keys from the ML-KEM shared secret, and establishing the complete hybrid encryption and decryption workflow for QuantumVault.
+
+**Week 1 Final Goal:** Develop a functional, tested and reusable ML-KEM-768 key encapsulation module that establishes the post-quantum cryptographic foundation for QuantumVault.
