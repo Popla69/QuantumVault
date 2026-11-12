@@ -1,0 +1,57 @@
+# QUANTUMVAULT – DAY 1 PROGRESS REPORT
+
+**Role:** Member 1 – Cryptography & PQC Engineer  
+**Phase:** Week 1 – Cryptographic Foundation  
+**Activity:** Research and Technical Understanding
+
+## 1. Work Performed
+
+- Studied the fundamentals of Post-Quantum Cryptography (PQC).
+- Researched the potential impact of quantum computing on conventional cryptographic algorithms such as RSA and ECC.
+- Studied the Harvest Now, Decrypt Later (HNDL) threat.
+- Explored lattice-based cryptography and the Module Learning With Errors (Module-LWE) problem.
+- Reviewed the CRYSTALS-Kyber algorithm and its evolution into the standardized ML-KEM mechanism.
+- Studied the NIST FIPS 203 standard.
+- Compared ML-KEM-512, ML-KEM-768 and ML-KEM-1024.
+- Studied the three primary ML-KEM operations: Key Generation, Encapsulation and Decapsulation.
+
+## 2. Technical Understanding Gained
+
+The research established the following:
+
+- ML-KEM is a post-quantum key-encapsulation mechanism standardized by NIST.
+- ML-KEM establishes a shared secret between two parties without directly transmitting the secret.
+- ML-KEM-768 is selected as the initial parameter set for QuantumVault.
+- ML-KEM does not directly encrypt files; it establishes cryptographic key material for subsequent symmetric encryption.
+- AES-256-GCM will be responsible for file encryption and authenticated decryption.
+- HKDF-SHA-256 will be used to derive symmetric encryption keys from the established shared secret.
+
+## 3. Research References Studied
+
+1. CRYSTALS-Kyber: Algorithm Specifications and Supporting Documentation (2021).
+2. NIST FIPS 203 – Module-Lattice-Based Key-Encapsulation Mechanism Standard (2024).
+3. NIST SP 800-227 – Recommendations for Key-Encapsulation Mechanisms (2025).
+
+## 4. Key Technical Decisions
+
+| Component | Selected approach |
+|---|---|
+| PQC algorithm | ML-KEM |
+| Parameter set | ML-KEM-768 |
+| Standard | NIST FIPS 203 |
+| Symmetric encryption | AES-256-GCM |
+| Key derivation | HKDF-SHA-256 |
+
+## 5. Next Planned Activities
+
+- Evaluate suitable Python cryptographic libraries supporting ML-KEM.
+- Configure the development environment.
+- Begin implementation of ML-KEM-768 key generation.
+- Implement encapsulation and decapsulation.
+- Validate shared-secret agreement.
+
+## 6. Day 1 Outcome
+
+Completed the initial technical research and established the cryptographic approach for QuantumVault. The foundational understanding of ML-KEM, its standardized operations and its role in the proposed hybrid encryption architecture has been established.
+
+**Status:** Research and technical planning completed. Implementation activities are scheduled for the next phase.
