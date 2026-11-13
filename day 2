@@ -1,0 +1,36 @@
+# QUANTUMVAULT – DAY 2 PROGRESS REPORT
+
+**Role:** Member 1 – Cryptography & PQC Engineer  
+**Week:** 1 – Research & Foundation
+
+### 1. Work Progress
+
+Focused on evaluating Python libraries and implementation approaches for integrating ML-KEM into QuantumVault.
+
+- Explored available Python cryptography libraries supporting ML-KEM.
+- Reviewed compatibility with the NIST FIPS 203 standard.
+- Evaluated the requirements for ML-KEM-768 key generation, encapsulation, and decapsulation.
+- Reviewed how the selected cryptographic library can integrate with the planned AES-256-GCM encryption workflow.
+- Identified the dependencies and environment requirements for implementation.
+
+### 2. Technical Understanding
+
+The cryptographic workflow requires three main stages:
+
+1. **ML-KEM-768:** Generates a key pair and establishes a shared secret through encapsulation and decapsulation.
+2. **HKDF-SHA-256:** Derives a symmetric encryption key from the shared secret.
+3. **AES-256-GCM:** Encrypts and authenticates the file data.
+
+ML-KEM handles secure key establishment, while AES-256-GCM performs the actual file encryption.
+
+### 3. Next Steps
+
+- Finalize the Python library selection.
+- Configure the development environment.
+- Implement ML-KEM-768 key generation.
+- Test encapsulation and decapsulation.
+- Verify that both parties derive the same shared secret.
+
+### 4. Day 2 Outcome
+
+The implementation approach and required cryptographic components were further examined. The work is now focused on preparing the environment and beginning the ML-KEM implementation.
