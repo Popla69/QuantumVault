@@ -1,0 +1,43 @@
+# QUANTUMVAULT – DAY 3 PROGRESS REPORT
+
+**Role:** Member 1 – Cryptography & PQC Engineer  
+**Week:** 1 – Research & Foundation
+
+### 1. Work Progress
+
+Focused on understanding the practical implementation of ML-KEM-768 and preparing its core workflow.
+
+- Reviewed the ML-KEM-768 key-generation process.
+- Studied the encapsulation and decapsulation workflow.
+- Examined the role of public and private keys in establishing a shared secret.
+- Reviewed the expected input and output formats of the cryptographic operations.
+- Planned the structure of the Python cryptography module for integration into QuantumVault.
+
+### 2. Technical Understanding
+
+ML-KEM works through three primary operations:
+
+1. **Key Generation:** Produces a public key and a corresponding private key.
+2. **Encapsulation:** Uses the recipient's public key to generate a shared secret and an encapsulation ciphertext.
+3. **Decapsulation:** Uses the recipient's private key and encapsulation ciphertext to recover the same shared secret.
+
+The shared secret will later be passed to HKDF-SHA-256 to derive the AES-256-GCM encryption key.
+
+### 3. Implementation Planning
+
+Outlined the following reusable functions for the cryptographic module:
+
+- `generate_keypair()` – Generate ML-KEM-768 public and private keys.
+- `encapsulate(public_key)` – Generate the shared secret and encapsulation ciphertext.
+- `decapsulate(private_key, ciphertext)` – Recover the shared secret.
+
+### 4. Next Steps
+
+- Begin implementing the ML-KEM-768 operations using the selected library.
+- Test key generation and encapsulation.
+- Verify shared-secret agreement through decapsulation.
+- Handle invalid inputs and cryptographic errors.
+
+### 5. Day 3 Outcome
+
+The ML-KEM-768 workflow and its required module structure have been studied and outlined, preparing the project for practical implementation.
