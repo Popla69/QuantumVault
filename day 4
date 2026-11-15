@@ -1,0 +1,97 @@
+# QUANTUMVAULT – DAY 4 PROGRESS REPORT
+
+**Role:** Member 1 – Cryptography & PQC Engineer  
+**Week:** 1 – Research & Foundation
+
+### 1. Work Progress
+
+Started preparing the practical implementation of the ML-KEM-768 cryptographic module.
+
+- Explored the Python `pqcrypto` library for standardized ML-KEM support.
+- Prepared the initial Python implementation for ML-KEM-768 key generation.
+- Structured the encapsulation and decapsulation workflow.
+- Added a shared-secret verification step to check whether both parties derive the same secret.
+- Reviewed the expected key and ciphertext sizes according to the ML-KEM-768 parameter set.
+
+### 2. Code Implementation
+
+**Installation:**
+```bash
+pip install pqcrypto
+```
+
+**File: `pqc.py`**
+
+```python
+from pqcrypto.kem.ml_kem_768 import (
+    keygen,
+    encaps,
+    decaps
+)
+from secrets import compare_digest
+
+
+def generate_keypair():
+    public_key, private_key = keygen()
+    return public_key, private_key
+
+
+def encapsulate(public_key):
+    ciphertext, shared_secret = encaps(public_key)
+    return ciphertext, shared_secret
+
+
+def decapsulate(private_key, ciphertext):
+    return decaps(private_key, ciphertext)
+
+
+if __name__ == "__main__":
+
+    # Generate ML-KEM-768 key pair
+    public_key, private_key = generate_keypair()
+
+    # Sender encapsulates a shared secret
+    ciphertext, sender_secret = encapsulate(public_key)
+
+    # Receiver decapsulates the ciphertext
+    receiver_secret = decapsulate(
+        private_key,
+        ciphertext
+    )
+
+    # Verify shared-secret agreement
+    result = compare_digest(
+        sender_secret,
+        receiver_secret
+    )
+
+    print("ML-KEM-768 Key Exchange")
+    print("----------------------")
+    print("Public Key Size:", len(public_key))
+    print("Private Key Size:", len(private_key))
+    print("Ciphertext Size:", len(ciphertext))
+    print("Shared Secret Size:", len(sender_secret))
+    print("Shared Secrets Match:", result)
+
+    assert result
+```
+
+### 3. Expected Technical Output
+
+| Component | Expected size |
+|---|---:|
+| Public key | 1184 bytes |
+| Private key | 2400 bytes |
+| Encapsulation ciphertext | 1088 bytes |
+| Shared secret | 32 bytes |
+
+### 4. Next Steps
+
+- Run and validate the ML-KEM-768 implementation.
+- Add error handling and invalid-input tests.
+- Implement HKDF-SHA-256 for key derivation.
+- Integrate AES-256-GCM for file encryption.
+
+### 5. Day 4 Outcome
+
+Prepared the initial ML-KEM-768 implementation structure, covering key generation, encapsulation, decapsulation, and shared-secret verification. This establishes the foundation for QuantumVault's post-quantum key-establishment module.
