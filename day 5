@@ -1,0 +1,193 @@
+# QUANTUMVAULT – DAY 5 PROGRESS REPORT
+
+**Role:** Member 1 – Cryptography & PQC Engineer  
+**Week:** 1 – Research & Foundation
+
+### 1. Work Progress
+
+Worked on extending the ML-KEM implementation into a hybrid encryption workflow.
+
+- Prepared the integration of ML-KEM-768 with AES-256-GCM.
+- Studied HKDF-SHA-256 for deriving symmetric encryption keys.
+- Implemented the initial key-derivation workflow.
+- Developed encryption and decryption functions for byte-based file data.
+- Added authentication and integrity verification through AES-GCM.
+- Planned validation for incorrect keys and modified ciphertext.
+
+### 2. Code Implementation
+
+**Dependencies:**
+
+```bash
+pip install pqcrypto cryptography
+```
+
+**File: `key_derivation.py`**
+
+```python
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+
+
+def derive_aes_key(shared_secret, salt):
+    hkdf = HKDF(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=salt,
+        info=b"QuantumVault-File-Encryption"
+    )
+
+    return hkdf.derive(shared_secret)
+```
+
+**File: `symmetric.py`**
+
+```python
+import os
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
+
+def encrypt_data(aes_key, plaintext):
+    nonce = os.urandom(12)
+
+    aes = AESGCM(aes_key)
+
+    encrypted_data = aes.encrypt(
+        nonce,
+        plaintext,
+        b"QuantumVault-v1"
+    )
+
+    return nonce, encrypted_data
+
+
+def decrypt_data(aes_key, nonce, encrypted_data):
+    aes = AESGCM(aes_key)
+
+    plaintext = aes.decrypt(
+        nonce,
+        encrypted_data,
+        b"QuantumVault-v1"
+    )
+
+    return plaintext
+```
+
+**File: `crypto_service.py`**
+
+```python
+import os
+
+from pqcrypto.kem.ml_kem_768 import (
+    keygen, encaps, decaps
+)
+
+from key_derivation import derive_aes_key
+from symmetric import encrypt_data, decrypt_data
+
+
+def encrypt_file_data(public_key, file_data):
+
+    # Establish a shared secret
+    kem_ciphertext, shared_secret = encaps(public_key)
+
+    # Derive the AES encryption key
+    salt = os.urandom(16)
+    aes_key = derive_aes_key(shared_secret, salt)
+
+    # Encrypt file data
+    nonce, encrypted_data = encrypt_data(
+        aes_key,
+        file_data
+    )
+
+    return {
+        "kem_ciphertext": kem_ciphertext,
+        "salt": salt,
+        "nonce": nonce,
+        "encrypted_data": encrypted_data
+    }
+
+
+def decrypt_file_data(private_key, package):
+
+    # Recover the shared secret
+    shared_secret = decaps(
+        private_key,
+        package["kem_ciphertext"]
+    )
+
+    # Reconstruct the AES key
+    aes_key = derive_aes_key(
+        shared_secret,
+        package["salt"]
+    )
+
+    # Decrypt and authenticate file data
+    return decrypt_data(
+        aes_key,
+        package["nonce"],
+        package["encrypted_data"]
+    )
+```
+
+### 3. Integration Testing Example
+
+**File: `test_crypto_service.py`**
+
+```python
+from pqcrypto.kem.ml_kem_768 import keygen
+from crypto_service import (
+    encrypt_file_data,
+    decrypt_file_data
+)
+
+
+def test_file_encryption():
+
+    public_key, private_key = keygen()
+
+    original_data = (
+        b"QuantumVault secure file storage test"
+    )
+
+    package = encrypt_file_data(
+        public_key,
+        original_data
+    )
+
+    recovered_data = decrypt_file_data(
+        private_key,
+        package
+    )
+
+    assert recovered_data == original_data
+
+    print("Encryption successful")
+    print("Decryption successful")
+    print("File integrity verified")
+
+
+if __name__ == "__main__":
+    test_file_encryption()
+```
+
+### 4. Security Considerations
+
+- A fresh 12-byte nonce is generated for each AES-GCM encryption.
+- HKDF derives a 256-bit AES key from the ML-KEM shared secret.
+- AES-GCM authenticates encrypted data and detects unauthorized modification.
+- The KEM ciphertext, salt, nonce, and encrypted data must be stored together.
+- Private keys and shared secrets must never be exposed in logs.
+
+### 5. Next Steps
+
+- Execute and validate the complete encryption/decryption workflow.
+- Test modified ciphertext and incorrect keys.
+- Add file-based encryption and decryption support.
+- Improve key management and secure storage.
+- Prepare the cryptographic module for integration with the filesystem component.
+
+### 6. Day 5 Outcome
+
+Developed the initial architecture for combining post-quantum key establishment with symmetric authenticated encryption. The workflow connects ML-KEM-768, HKDF-SHA-256, and AES-256-GCM to establish the foundation of QuantumVault's encrypted file-storage system.
