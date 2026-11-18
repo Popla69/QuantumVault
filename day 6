@@ -1,0 +1,126 @@
+# QUANTUMVAULT – DAY 6 PROGRESS REPORT
+
+**Role:** Member 1 – Cryptography & PQC Engineer  
+**Week:** 2 – Hybrid Encryption & File Handling
+
+### 1. Work Progress
+
+Focused on extending the hybrid cryptographic workflow to support file-based encryption.
+
+- Designed file-reading and encrypted-file-writing functionality.
+- Integrated ML-KEM-768 with the existing key-derivation workflow.
+- Extended AES-256-GCM encryption to handle file contents.
+- Prepared a structured encrypted package containing KEM ciphertext, salt, nonce, and encrypted data.
+- Added authentication-failure handling for modified or corrupted encrypted files.
+- Reviewed secure handling of cryptographic keys and temporary data.
+
+### 2. Code Implementation
+
+**File: `file_crypto.py`**
+
+```python
+import os
+import json
+import base64
+
+from pqcrypto.kem.ml_kem_768 import encaps, decaps
+from key_derivation import derive_aes_key
+from symmetric import encrypt_data, decrypt_data
+
+
+def encrypt_file(public_key, input_path, output_path):
+
+    with open(input_path, "rb") as file:
+        plaintext = file.read()
+
+    # Generate KEM shared secret
+    kem_ciphertext, shared_secret = encaps(public_key)
+
+    # Derive AES key
+    salt = os.urandom(16)
+    aes_key = derive_aes_key(shared_secret, salt)
+
+    # Encrypt file contents
+    nonce, ciphertext = encrypt_data(aes_key, plaintext)
+
+    package = {
+        "version": 1,
+        "kem_ciphertext": base64.b64encode(
+            kem_ciphertext
+        ).decode(),
+        "salt": base64.b64encode(salt).decode(),
+        "nonce": base64.b64encode(nonce).decode(),
+        "ciphertext": base64.b64encode(ciphertext).decode()
+    }
+
+    with open(output_path, "w") as file:
+        json.dump(package, file)
+
+    print("File encrypted successfully.")
+
+
+def decrypt_file(private_key, input_path, output_path):
+
+    with open(input_path, "r") as file:
+        package = json.load(file)
+
+    kem_ciphertext = base64.b64decode(
+        package["kem_ciphertext"]
+    )
+    salt = base64.b64decode(package["salt"])
+    nonce = base64.b64decode(package["nonce"])
+    ciphertext = base64.b64decode(package["ciphertext"])
+
+    # Recover shared secret
+    shared_secret = decaps(
+        private_key,
+        kem_ciphertext
+    )
+
+    # Derive AES key
+    aes_key = derive_aes_key(shared_secret, salt)
+
+    # Authenticate and decrypt
+    plaintext = decrypt_data(
+        aes_key,
+        nonce,
+        ciphertext
+    )
+
+    with open(output_path, "wb") as file:
+        file.write(plaintext)
+
+    print("File decrypted successfully.")
+```
+
+### 3. Security Testing
+
+Prepared the following test scenarios:
+
+| Test case | Expected behavior |
+|---|---|
+| Valid encrypted file | Successful decryption |
+| Modified ciphertext | Authentication failure |
+| Incorrect private key | Decryption failure |
+| Modified nonce | Authentication failure |
+| Corrupted package | Input validation error |
+
+### 4. Important Security Observations
+
+- AES-GCM authentication prevents undetected modification of encrypted content.
+- A fresh nonce must be generated for every encryption under a given AES key.
+- The private key must remain protected and must not be stored alongside encrypted files without protection.
+- The encrypted package must preserve all information required for decryption.
+- Public-key authentication is necessary to prevent public-key substitution attacks.
+
+### 5. Next Steps
+
+- Execute file encryption and decryption tests.
+- Test corrupted and modified encrypted packages.
+- Add stronger input validation and exception handling.
+- Evaluate large-file encryption using streaming rather than loading the entire file into memory.
+- Coordinate the package format with the filesystem/backend team.
+
+### 6. Day 6 Outcome
+
+Extended the proposed cryptographic architecture to support file-level encryption and decryption. The implementation now has a defined package structure for combining post-quantum key establishment with authenticated symmetric encryption.
