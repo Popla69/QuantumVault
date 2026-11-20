@@ -1,0 +1,136 @@
+# QUANTUMVAULT – DAY 8 PROGRESS REPORT
+
+**Role:** Member 1 – Cryptography & PQC Engineer  
+**Week:** 2 – Key Management & Security Improvements
+
+### 1. Work Progress
+
+Focused on designing a structured key-management mechanism for the QuantumVault cryptographic engine.
+
+- Studied cryptographic key lifecycle management.
+- Reviewed secure handling of ML-KEM-768 public and private keys.
+- Explored separation of key generation, key storage, and key usage.
+- Designed a reusable key-management module.
+- Reviewed key rotation and recovery requirements.
+- Identified the importance of preventing private-key exposure through logs and temporary files.
+
+### 2. Code Implementation – Key Manager
+
+**File: `key_manager.py`**
+
+```python
+import os
+import json
+import base64
+
+from pqcrypto.kem.ml_kem_768 import keygen
+
+
+class KeyManager:
+
+    def __init__(self, storage_dir="keys"):
+        self.storage_dir = storage_dir
+        os.makedirs(storage_dir, exist_ok=True)
+
+    def generate_keys(self, key_id):
+
+        public_key, private_key = keygen()
+
+        public_path = os.path.join(
+            self.storage_dir,
+            f"{key_id}_public.key"
+        )
+
+        private_path = os.path.join(
+            self.storage_dir,
+            f"{key_id}_private.key"
+        )
+
+        # Store public key
+        with open(public_path, "wb") as file:
+            file.write(public_key)
+
+        # Restrict permissions on POSIX systems
+        fd = os.open(
+            private_path,
+            os.O_WRONLY | os.O_CREAT | os.O_EXCL,
+            0o600
+        )
+
+        with os.fdopen(fd, "wb") as file:
+            file.write(private_key)
+
+        return {
+            "key_id": key_id,
+            "public_key_path": public_path,
+            "private_key_path": private_path
+        }
+
+    def load_public_key(self, key_id):
+
+        path = os.path.join(
+            self.storage_dir,
+            f"{key_id}_public.key"
+        )
+
+        with open(path, "rb") as file:
+            return file.read()
+
+    def load_private_key(self, key_id):
+
+        path = os.path.join(
+            self.storage_dir,
+            f"{key_id}_private.key"
+        )
+
+        with open(path, "rb") as file:
+            return file.read()
+```
+
+### 3. Usage Example
+
+```python
+from key_manager import KeyManager
+
+manager = KeyManager()
+
+result = manager.generate_keys("user_001")
+
+print("Key ID:", result["key_id"])
+
+public_key = manager.load_public_key("user_001")
+
+print("Public key loaded:", len(public_key), "bytes")
+```
+
+### 4. Key Management Design
+
+The proposed lifecycle consists of:
+
+1. **Generation:** Generate ML-KEM-768 key pairs.
+2. **Storage:** Store public and private keys separately.
+3. **Usage:** Load the required key for cryptographic operations.
+4. **Rotation:** Generate a replacement key pair when required.
+5. **Revocation:** Mark compromised or outdated keys as unusable.
+6. **Recovery:** Define a secure recovery mechanism for authorized users.
+
+### 5. Security Considerations
+
+- Private keys must be encrypted at rest in a production deployment.
+- File permissions alone do not provide complete key protection.
+- Key identifiers should be unique and validated.
+- Private keys must never be exposed in application logs.
+- Old keys may need to remain available to decrypt previously encrypted files.
+- Key rotation must preserve access to existing encrypted data.
+
+### 6. Next Steps
+
+- Implement encrypted private-key storage.
+- Add key identifiers and lifecycle metadata.
+- Develop key rotation and revocation functionality.
+- Test key loading and storage operations.
+- Coordinate key-management interfaces with the backend team.
+
+### 7. Day 8 Outcome
+
+Designed and prepared the initial key-management module for QuantumVault, establishing the foundation for organized cryptographic key generation, storage, retrieval, and lifecycle management.
