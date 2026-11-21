@@ -1,0 +1,133 @@
+# QUANTUMVAULT – DAY 9 PROGRESS REPORT
+
+**Role:** Member 1 – Cryptography & Post-Quantum Cryptography Engineer  
+**Week:** 2 – Hybrid Encryption & Validation
+
+### 1. Work Progress
+
+Focused on improving the reliability of the initial hybrid encryption implementation.
+
+- Reviewed the integration between ML-KEM-768, HKDF-SHA-256, and AES-256-GCM.
+- Examined input validation requirements for cryptographic operations.
+- Added preliminary checks for AES key, nonce, and salt lengths.
+- Reviewed exception handling for failed authenticated decryption.
+- Improved the organization of encrypted package components.
+- Studied how malformed encryption data should be handled safely.
+
+### 2. Code Implementation – Input Validation
+
+**File: `symmetric.py`**
+
+```python
+import os
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
+
+def encrypt_data(aes_key, plaintext):
+
+    if len(aes_key) != 32:
+        raise ValueError("Invalid AES-256 key length")
+
+    if not isinstance(plaintext, bytes):
+        raise TypeError("Plaintext must be bytes")
+
+    nonce = os.urandom(12)
+
+    aes = AESGCM(aes_key)
+
+    ciphertext = aes.encrypt(
+        nonce,
+        plaintext,
+        b"QuantumVault-v1"
+    )
+
+    return nonce, ciphertext
+
+
+def decrypt_data(aes_key, nonce, ciphertext):
+
+    if len(aes_key) != 32:
+        raise ValueError("Invalid AES key length")
+
+    if len(nonce) != 12:
+        raise ValueError("Invalid nonce length")
+
+    aes = AESGCM(aes_key)
+
+    try:
+        return aes.decrypt(
+            nonce,
+            ciphertext,
+            b"QuantumVault-v1"
+        )
+
+    except Exception:
+        raise ValueError(
+            "Decryption failed: authentication error"
+        ) from None
+```
+
+### 3. Code Implementation – Package Validation
+
+**File: `package_validator.py`**
+
+```python
+def validate_package(package):
+
+    required_fields = {
+        "kem_ciphertext",
+        "salt",
+        "nonce",
+        "ciphertext"
+    }
+
+    if not isinstance(package, dict):
+        raise TypeError("Package must be a dictionary")
+
+    if not required_fields.issubset(package):
+        raise ValueError("Missing package components")
+
+    if len(package["salt"]) != 16:
+        raise ValueError("Invalid salt length")
+
+    if len(package["nonce"]) != 12:
+        raise ValueError("Invalid nonce length")
+
+    if not package["ciphertext"]:
+        raise ValueError("Empty ciphertext")
+
+    return True
+```
+
+### 4. Testing Approach
+
+Prepared validation scenarios for the improved cryptographic module.
+
+| Test case | Expected behavior |
+|---|---|
+| Valid AES key | Accepted |
+| Incorrect AES key length | Rejected |
+| Invalid nonce length | Rejected |
+| Missing package field | Rejected |
+| Modified ciphertext | Authentication failure |
+| Invalid plaintext type | Rejected |
+
+### 5. Technical Observations
+
+- Input validation prevents malformed data from reaching cryptographic operations.
+- AES-GCM authentication must be checked before plaintext is accepted.
+- Cryptographic error messages should not expose private keys or internal secrets.
+- Package validation should be performed before decapsulation and decryption.
+- Validation must complement, not replace, cryptographic authentication.
+
+### 6. Next Steps
+
+- Add automated unit tests for package validation.
+- Improve malformed-input handling.
+- Review consistency between encryption and decryption interfaces.
+- Prepare the cryptographic module for future filesystem integration.
+- Begin studying secure private-key storage requirements.
+
+### 7. Day 9 Outcome
+
+Worked on improving the reliability and input-handling structure of QuantumVault's hybrid encryption prototype. The focus was on validating cryptographic inputs, organizing encrypted package components, and preparing the module for more extensive testing.
