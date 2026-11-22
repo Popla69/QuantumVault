@@ -1,0 +1,171 @@
+# QUANTUMVAULT – DAY 10 PROGRESS REPORT
+
+**Role:** Member 1 – Cryptography & Post-Quantum Cryptography Engineer  
+**Week:** 2 – Hybrid Encryption & Validation
+
+## 1. Work Progress
+
+Focused on preparing automated tests for the hybrid encryption components developed during Week 2.
+
+- Reviewed the ML-KEM-768 key-establishment workflow.
+- Prepared unit tests for HKDF-SHA-256 key derivation.
+- Tested the expected AES-256-GCM key and nonce requirements.
+- Developed test cases for successful encryption and decryption.
+- Examined authentication failure scenarios involving modified ciphertext.
+- Reviewed invalid-input handling and exception behavior.
+- Organized the test structure for individual cryptographic modules.
+
+## 2. Code Implementation – HKDF Testing
+
+**File: `test_key_derivation.py`**
+
+```python
+import os
+
+from key_derivation import derive_aes_key
+
+
+def test_key_derivation():
+
+    shared_secret = os.urandom(32)
+    salt = os.urandom(16)
+
+    key1 = derive_aes_key(shared_secret, salt)
+    key2 = derive_aes_key(shared_secret, salt)
+
+    assert len(key1) == 32
+    assert key1 == key2
+
+    print("HKDF test passed")
+
+
+def test_different_salts():
+
+    shared_secret = os.urandom(32)
+
+    key1 = derive_aes_key(
+        shared_secret,
+        os.urandom(16)
+    )
+
+    key2 = derive_aes_key(
+        shared_secret,
+        os.urandom(16)
+    )
+
+    assert key1 != key2
+
+    print("Salt variation test passed")
+
+
+if __name__ == "__main__":
+    test_key_derivation()
+    test_different_salts()
+```
+
+## 3. Code Implementation – AES-GCM Testing
+
+**File: `test_symmetric.py`**
+
+```python
+import os
+import pytest
+
+from cryptography.exceptions import InvalidTag
+
+from symmetric import encrypt_data, decrypt_data
+
+
+def test_encryption_roundtrip():
+
+    key = os.urandom(32)
+
+    original = b"QuantumVault cryptographic testing"
+
+    nonce, ciphertext = encrypt_data(key, original)
+
+    recovered = decrypt_data(
+        key,
+        nonce,
+        ciphertext
+    )
+
+    assert recovered == original
+
+
+def test_tampered_ciphertext():
+
+    key = os.urandom(32)
+
+    nonce, ciphertext = encrypt_data(
+        key,
+        b"Confidential QuantumVault data"
+    )
+
+    modified = (
+        ciphertext[:-1]
+        + bytes([ciphertext[-1] ^ 1])
+    )
+
+    with pytest.raises(InvalidTag):
+        decrypt_data(key, nonce, modified)
+
+
+def test_wrong_key():
+
+    key1 = os.urandom(32)
+    key2 = os.urandom(32)
+
+    nonce, ciphertext = encrypt_data(
+        key1,
+        b"Sensitive information"
+    )
+
+    with pytest.raises(InvalidTag):
+        decrypt_data(key2, nonce, ciphertext)
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])
+```
+
+## 4. Test Execution
+
+The prepared tests cover the following scenarios:
+
+| Test | Expected behavior |
+|---|---|
+| HKDF key length | 32 bytes |
+| Same input and salt | Same derived key |
+| Different salts | Different derived keys |
+| AES encryption round-trip | Original data recovered |
+| Modified ciphertext | Authentication failure |
+| Incorrect AES key | Authentication failure |
+
+**Execution command:**
+
+```bash
+pytest -v
+```
+
+## 5. Technical Observations
+
+- HKDF is deterministic for identical input parameters.
+- Different salts produce different derived keys with overwhelming probability.
+- AES-GCM rejects ciphertext that fails authentication.
+- InvalidTag is the specific exception raised by authenticated decryption when its authentication check fails.
+- Unit tests help identify implementation errors before module integration.
+
+## 6. Next Steps
+
+- Extend automated testing to ML-KEM-768 operations.
+- Validate cryptographic output sizes against FIPS 203.
+- Review the complete hybrid encryption workflow.
+- Prepare the module interface for backend integration.
+- Begin research into secure private-key storage for Week 3.
+
+## 7. Day 10 Outcome
+
+Prepared automated unit-test coverage for HKDF-SHA-256 and AES-256-GCM. The testing structure focuses on key derivation consistency, encryption/decryption correctness, and authentication failure detection.
+
+The next stage will extend validation to the ML-KEM component and prepare the cryptographic module for secure key management.
